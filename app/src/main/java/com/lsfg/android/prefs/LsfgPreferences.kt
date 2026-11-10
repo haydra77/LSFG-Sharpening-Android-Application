@@ -255,10 +255,10 @@ class LsfgPreferences(ctx: Context) {
         cpuVignette = prefs.getFloat(KEY_CPU_VIGNETTE, 0.0f).coerceIn(0f, 1f),
         gpuPostProcessingEnabled = prefs.getBoolean(KEY_GPU_POST, false),
         gpuPostProcessingStage = GpuPostProcessingStage.fromPref(prefs.getString(KEY_GPU_STAGE, null)),
-        gpuPostProcessingMethod = GpuPostProcessingMethod.fromPref(prefs.getString(KEY_GPU_METHOD, null)),
-        gpuUpscaleFactor = prefs.getFloat(KEY_GPU_UPSCALE, 1.0f).coerceIn(1.0f, 2.0f),
-        gpuSharpness = prefs.getFloat(KEY_GPU_SHARPNESS, 0.5f).coerceIn(0f, 1f),
-        gpuStrength = prefs.getFloat(KEY_GPU_STRENGTH, 0.5f).coerceIn(0f, 1f),
+        gpuPostProcessingMethod = GpuPostProcessingMethod.UNSHARP_MASK,
+        gpuUpscaleFactor = 1.0f,
+        gpuSharpness = prefs.getFloat(KEY_GPU_SHARPNESS, 2.0f).coerceIn(0f, 3f),
+        gpuStrength = prefs.getFloat(KEY_GPU_STRENGTH, 1.0f).coerceIn(0f, 1f),
         pacingPreset = PacingPreset.fromPref(prefs.getString(KEY_PACING_PRESET, null)),
         vsyncAlignmentEnabled = prefs.getBoolean(KEY_VSYNC_ALIGN, PacingDefaults.VSYNC_ALIGNMENT),
         vsyncRefreshOverride = VsyncRefreshOverride.fromPref(prefs.getString(KEY_VSYNC_OVERRIDE, null)),
@@ -341,7 +341,7 @@ class LsfgPreferences(ctx: Context) {
         .putFloat(KEY_GPU_UPSCALE, value.coerceIn(1.0f, 2.0f))
         .apply()
     fun setGpuSharpness(value: Float) = prefs.edit()
-        .putFloat(KEY_GPU_SHARPNESS, value.coerceIn(0f, 1f))
+        .putFloat(KEY_GPU_SHARPNESS, value.coerceIn(0f, 3f))
         .apply()
     fun setGpuStrength(value: Float) = prefs.edit()
         .putFloat(KEY_GPU_STRENGTH, value.coerceIn(0f, 1f))
