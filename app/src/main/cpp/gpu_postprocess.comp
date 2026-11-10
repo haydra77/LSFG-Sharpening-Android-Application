@@ -239,6 +239,24 @@ vec3 sharpen(vec3 color, vec2 srcPos, float amount) {
     return clamp(color + (color - blur) * amount, 0.0, 1.0);
 }
 
+// CPU GAMER_SHARP equivalent: a 3x3 Gaussian unsharp mask.
+// This runs entirely in the Vulkan compute shader, avoiding CPU readback.
+vec3 sharpenCpuMatch(vec3 color, vec2 srcPos, float amount) {
+    ivec2 p = ivec2(floor(srcPos));
+    vec3 blur =
+        loadPx(p + ivec2(-1, -1)).rgb +
+        2.0 * loadPx(p + ivec2( 0, -1)).rgb +
+        loadPx(p + ivec2( 1, -1)).rgb +
+        2.0 * loadPx(p + ivec2(-1,  0)).rgb +
+        4.0 * color +
+        2.0 * loadPx(p + ivec2( 1,  0)).rgb +
+        loadPx(p + ivec2(-1,  1)).rgb +
+        2.0 * loadPx(p + ivec2( 0,  1)).rgb +
+        loadPx(p + ivec2( 1,  1)).rgb;
+    blur *= (1.0 / 16.0);
+    return clamp(color + (color - blur) * amount, 0.0, 1.0);
+}
+
 vec3 contrastAdaptive(vec3 color, vec2 srcPos, float amount) {
     ivec2 p = ivec2(floor(srcPos));
     vec3 minC = color;
@@ -316,7 +334,7 @@ void main() {
         color = sampleBilinear(srcPos);
     }
 
-    float sharp = clamp(pc.sharpness, 0.0, 1.0);
+    float sharp = clamp(pc.sharpness, 0.0, 3.0);
     float strength = clamp(pc.strength, 0.0, 1.0);
 
     if (pc.method == 0) {
