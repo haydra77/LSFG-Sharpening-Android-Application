@@ -1314,7 +1314,7 @@ class SettingsDrawerOverlay(
         prefs.setGpuUpscaleFactor(1.0f)
         gpuSection.addView(miniHeader("Sharpen only — Vulkan compute"))
         gpuSection.addView(TextView(ctx).apply {
-            setTextColor(COLOR_MUTED)
+            setTextColor(Color.LTGRAY)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
             text = "Unsharp Mask (3x3 Gaussian), no scaling. 100% matches CPU Gamer Sharp; up to 300% is extra aggressive."
         })
