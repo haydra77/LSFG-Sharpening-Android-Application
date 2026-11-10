@@ -245,7 +245,7 @@ bool GpuPostProcessor::process(VulkanSession &vk,
         .dstW = static_cast<int32_t>(dst.extent.width),
         .dstH = static_cast<int32_t>(dst.extent.height),
         .method = std::clamp(config.method, 0, 15),
-        .sharpness = std::clamp(config.sharpness, 0.0f, 1.0f),
+        .sharpness = std::clamp(config.sharpness, 0.0f, 3.0f),
         .strength = std::clamp(config.strength, 0.0f, 1.0f),
         .pad0 = 0.0f,
     };
