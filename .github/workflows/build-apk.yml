@@ -55,10 +55,30 @@ jobs:
       - name: Build ARM64 debug APK
         run: ./gradlew :app:assembleDebug --no-daemon
 
+      - name: Collect unstripped native libraries
+        shell: bash
+        run: |
+          mkdir -p native-symbols
+          find app/build -type f -name 'liblsfg-android.so' -print0 | while IFS= read -r -d '' file; do
+            rel="${file#app/build/}"
+            mkdir -p "native-symbols/$(dirname "$rel")"
+            cp "$file" "native-symbols/$rel"
+          done
+          test -n "$(find native-symbols -type f -name 'liblsfg-android.so' -print -quit)"
+          tar -czf lsfg-native-symbols-arm64.tar.gz native-symbols
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: LSFG-Android-Sharpen-arm64
           path: app/build/outputs/apk/debug/*arm64-v8a*.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload native debug symbols
+        uses: actions/upload-artifact@v4
+        with:
+          name: LSFG-native-debug-symbols
+          path: lsfg-native-symbols-arm64.tar.gz
           if-no-files-found: error
           retention-days: 14
