@@ -50,8 +50,19 @@ jobs:
           if old_feature not in s:
               raise SystemExit("Could not find Vulkan 1.3 feature structure to replace")
           s = s.replace(old_feature, new_feature, 1)
-          s = s.replace('    volkLoadDevice(deviceHandle);\n', '    volkLoadDevice(deviceHandle);\n    if (vkCmdPipelineBarrier2 == nullptr) {\n        vkDestroyDevice(deviceHandle, nullptr);\n        throw LSFG::vulkan_error(VK_ERROR_EXTENSION_NOT_PRESENT, "vkCmdPipelineBarrier2 was not loaded after enabling VK_KHR_synchronization2");\n    }\n', 1)
+          s = s.replace('    volkLoadDevice(deviceHandle);\n', '    volkLoadDevice(deviceHandle);\n    if (vkCmdPipelineBarrier2KHR == nullptr) {\n        vkDestroyDevice(deviceHandle, nullptr);\n        throw LSFG::vulkan_error(VK_ERROR_EXTENSION_NOT_PRESENT, "vkCmdPipelineBarrier2KHR was not loaded after enabling VK_KHR_synchronization2");\n    }\n', 1)
           p.write_text(s)
+
+          # Vulkan 1.1 exposes the synchronization2 extension entry point with
+          # the KHR suffix. The unsuffixed core 1.3 symbol remains null on 1.1.
+          for rel in ("framegen/src/common/utils.cpp",
+                      "framegen/v3.1p_src/context.cpp",
+                      "framegen/v3.1_src/context.cpp"):
+              q = Path(rel)
+              if q.exists():
+                  t = q.read_text()
+                  t = t.replace("vkCmdPipelineBarrier2(", "vkCmdPipelineBarrier2KHR(")
+                  q.write_text(t)
           PY
 
       - name: Set up JDK 17
