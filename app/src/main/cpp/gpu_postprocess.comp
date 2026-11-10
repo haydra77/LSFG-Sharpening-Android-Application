@@ -344,8 +344,12 @@ void main() {
         color.rgb = sharpen(color.rgb, srcPos, 0.75 * sharp);
     } else if (pc.method == 8 || pc.method == 9 || pc.method == 10 || pc.method == 11) {
         color.rgb = animeEdge(color.rgb, srcPos, 0.55 * strength + 0.35 * sharp);
-    } else if (pc.method == 12 || pc.method == 13) {
-        color.rgb = sharpen(color.rgb, srcPos, 0.85 * sharp);
+    } else if (pc.method == 12) {
+        // CPU GAMER_SHARP's 3x3 Gaussian unsharp mask, executed on Vulkan.
+        // 100% matches the CPU amount; values up to 300% are deliberately aggressive.
+        color.rgb = sharpenCpuMatch(color.rgb, srcPos, sharp * strength);
+    } else if (pc.method == 13) {
+        color.rgb = sharpen(color.rgb, srcPos, 0.85 * min(sharp, 1.0));
     } else if (pc.method == 14) {
         color.rgb = contrastAdaptive(color.rgb, srcPos, 0.85 * strength);
     } else if (pc.method == 15) {
