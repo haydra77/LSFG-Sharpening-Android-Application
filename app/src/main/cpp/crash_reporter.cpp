@@ -14,6 +14,7 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+#include <ucontext.h>
 
 #include <atomic>
 #include <cstdint>
@@ -216,10 +217,57 @@ void signal_handler(int sig, siginfo_t *info, void *ucontext) {
     append_prop(fd, "sdk: ", "ro.build.version.sdk");
     append_prop(fd, "soc: ", "ro.soc.model");
 
-    sig_write(fd, "\n--- native backtrace ---\n");
-    UnwindCtx uc{fd, 0};
-    _Unwind_Backtrace(unwind_cb, &uc);
-    if (uc.count == 0) {
+    // The signal handler's own _Unwind_Backtrace starts at signal_handler,
+    // not at the instruction that faulted. Record the interrupted machine
+    // context first so the PC can be symbolicated against this exact .so.
+    sig_write(fd, "\n--- fault context ---\n");
+    uintptr_t faultPc = 0;
+    uintptr_t faultLr = 0;
+    uintptr_t faultSp = 0;
+    if (ucontext != nullptr) {
+        auto *ucxt = static_cast<ucontext_t *>(ucontext);
+#if defined(__aarch64__)
+        faultPc = static_cast<uintptr_t>(ucxt->uc_mcontext.pc);
+        faultSp = static_cast<uintptr_t>(ucxt->uc_mcontext.sp);
+        faultLr = static_cast<uintptr_t>(ucxt->uc_mcontext.regs[30]);
+#elif defined(__arm__)
+        faultPc = static_cast<uintptr_t>(ucxt->uc_mcontext.arm_pc);
+        faultSp = static_cast<uintptr_t>(ucxt->uc_mcontext.arm_sp);
+        faultLr = static_cast<uintptr_t>(ucxt->uc_mcontext.arm_lr);
+#elif defined(__x86_64__)
+        faultPc = static_cast<uintptr_t>(ucxt->uc_mcontext.gregs[REG_RIP]);
+        faultSp = static_cast<uintptr_t>(ucxt->uc_mcontext.gregs[REG_RSP]);
+#elif defined(__i386__)
+        faultPc = static_cast<uintptr_t>(ucxt->uc_mcontext.gregs[REG_EIP]);
+        faultSp = static_cast<uintptr_t>(ucxt->uc_mcontext.gregs[REG_ESP]);
+#endif
+    }
+    sig_write(fd, "fault_pc: "); sig_write_hex(fd, faultPc);
+    sig_write(fd, "\nfault_lr: "); sig_write_hex(fd, faultLr);
+    sig_write(fd, "\nfault_sp: "); sig_write_hex(fd, faultSp);
+    Dl_info faultInfo{};
+    if (faultPc != 0 && dladdr(reinterpret_cast<void *>(faultPc), &faultInfo) != 0 &&
+        faultInfo.dli_fname != nullptr) {
+        sig_write(fd, "\nfault_module: ");
+        sig_write(fd, faultInfo.dli_fname);
+        const uintptr_t base = reinterpret_cast<uintptr_t>(faultInfo.dli_fbase);
+        if (base != 0 && faultPc >= base) {
+            sig_write(fd, "+");
+            sig_write_hex(fd, faultPc - base);
+        }
+        if (faultInfo.dli_sname != nullptr) {
+            sig_write(fd, " ");
+            sig_write(fd, faultInfo.dli_sname);
+        }
+    }
+    sig_write(fd, "\n");
+
+    // This secondary trace is the handler's stack; retain it for diagnostics,
+    // but do not mistake frame #0 for the original faulting instruction.
+    sig_write(fd, "\n--- signal-handler backtrace ---\n");
+    UnwindCtx unwindCtx{fd, 0};
+    _Unwind_Backtrace(unwind_cb, &unwindCtx);
+    if (unwindCtx.count == 0) {
         sig_write(fd, "  (empty — unwind unavailable)\n");
     }
 
