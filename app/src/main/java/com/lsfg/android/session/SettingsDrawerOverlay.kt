@@ -1407,15 +1407,15 @@ class SettingsDrawerOverlay(
         }
         gpuAdvanced.addView(sliderRow("GPU strength", gpuStrengthValue))
         gpuAdvanced.addView(SeekBar(ctx).apply {
-            max = 10
-            progress = (initial.gpuStrength * 10f).toInt().coerceIn(0, 10)
+            max = 100
+            progress = (initial.gpuStrength * 100f).toInt().coerceIn(0, 100)
             progressDrawable = buildSeekTrack()
             thumb = buildSeekThumb()
             splitTrack = false
             var dragging = false
             setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar?, p: Int, fromUser: Boolean) {
-                    val strength = (p / 10f).coerceIn(0f, 1f)
+                    val strength = (p / 100f).coerceIn(0f, 1f)
                     gpuStrengthValue.text = "${(strength * 100f).toInt()}%"
                     if (fromUser) {
                         prefs.setGpuStrength(strength)
