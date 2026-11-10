@@ -83,6 +83,42 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Compile GPU post-processing shader
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y glslc
+          cd app/src/main/cpp
+          glslc --target-env=vulkan1.1 -O gpu_postprocess.comp -o gpu_postprocess.spv
+          python3 - <<'PY'
+          import struct
+          from pathlib import Path
+          spv = Path("gpu_postprocess.spv").read_bytes()
+          if len(spv) % 4:
+              raise SystemExit("SPIR-V bytecode size is not 4-byte aligned")
+          words = struct.unpack("<" + "I" * (len(spv) // 4), spv)
+          lines = [
+              "#pragma once",
+              "",
+              "#include <cstdint>",
+              "",
+              "namespace lsfg_android {",
+              "",
+              "alignas(4) static constexpr uint32_t kGpuPostprocessCompSpv[] = {",
+          ]
+          for i in range(0, len(words), 8):
+              lines.append("    " + ", ".join(f"0x{v:08x}u" for v in words[i:i+8]) + ",")
+          lines += [
+              "};",
+              "static constexpr uint32_t kGpuPostprocessCompSpvSize = sizeof(kGpuPostprocessCompSpv);",
+              "",
+              "} // namespace lsfg_android",
+              "",
+          ]
+          Path("gpu_postprocess_spv.hpp").write_text("\\n".join(lines))
+          print(f"Compiled GPU shader: {len(spv)} bytes")
+          PY
+
       - name: Build ARM64 debug APK
         run: ./gradlew :app:assembleDebug --no-daemon
 
