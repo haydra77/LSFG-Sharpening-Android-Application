@@ -40,17 +40,17 @@ jobs:
           from pathlib import Path
           p = Path("../lsfg-vk-android/framegen/src/core/device.cpp")
           s = p.read_text()
-          old_ext = '    "VK_KHR_maintenance1",                     // dependency\\n'
-          new_ext = old_ext + '    "VK_KHR_synchronization2",              // required for vkCmdPipelineBarrier2 on Vulkan 1.1 drivers\\n'
+          old_ext = '    "VK_KHR_maintenance1",                     // dependency\n'
+          new_ext = old_ext + '    "VK_KHR_synchronization2",              // required for vkCmdPipelineBarrier2 on Vulkan 1.1 drivers\n'
           if old_ext not in s:
               raise SystemExit("Could not find Android required-extension insertion point")
           s = s.replace(old_ext, new_ext, 1)
-          old_feature = 'VkPhysicalDeviceVulkan13Features features13{\\n        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,'
-          new_feature = 'VkPhysicalDeviceSynchronization2FeaturesKHR features13{\\n        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES_KHR,'
+          old_feature = 'VkPhysicalDeviceVulkan13Features features13{\n        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,'
+          new_feature = 'VkPhysicalDeviceSynchronization2FeaturesKHR features13{\n        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES_KHR,'
           if old_feature not in s:
               raise SystemExit("Could not find Vulkan 1.3 feature structure to replace")
           s = s.replace(old_feature, new_feature, 1)
-          s = s.replace('    volkLoadDevice(deviceHandle);\\n', '    volkLoadDevice(deviceHandle);\\n    if (vkCmdPipelineBarrier2 == nullptr) {\\n        vkDestroyDevice(deviceHandle, nullptr);\\n        throw LSFG::vulkan_error(VK_ERROR_EXTENSION_NOT_PRESENT, "vkCmdPipelineBarrier2 was not loaded after enabling VK_KHR_synchronization2");\\n    }\\n', 1)
+          s = s.replace('    volkLoadDevice(deviceHandle);\n', '    volkLoadDevice(deviceHandle);\n    if (vkCmdPipelineBarrier2 == nullptr) {\n        vkDestroyDevice(deviceHandle, nullptr);\n        throw LSFG::vulkan_error(VK_ERROR_EXTENSION_NOT_PRESENT, "vkCmdPipelineBarrier2 was not loaded after enabling VK_KHR_synchronization2");\n    }\n', 1)
           p.write_text(s)
           PY
 
