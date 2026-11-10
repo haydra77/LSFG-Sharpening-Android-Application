@@ -97,3 +97,14 @@ target_link_libraries(lsfg-android
         ${neuralnetworks-lib}
         android
 )
+
+
+# Keep native crash addresses symbolizable in diagnostic builds. The unstripped
+# shared library is uploaded separately by the GitHub Actions workflow.
+target_compile_options(lsfg-android PRIVATE
+    -g
+    -fno-omit-frame-pointer
+)
+target_link_options(lsfg-android PRIVATE
+    -Wl,--build-id
+)
