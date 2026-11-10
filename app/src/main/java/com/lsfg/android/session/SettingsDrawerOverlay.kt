@@ -1308,65 +1308,18 @@ class SettingsDrawerOverlay(
             liveParamsListener?.onParamsChanged()
         })
 
-        gpuSection.addView(miniHeader("Scaling"))
-        gpuSection.addView(gpuMethodChipRow(
-            category = GpuMethodCategory.SCALING,
-            initial = initial.gpuPostProcessingMethod,
-        ) {
-            prefs.setGpuPostProcessingMethod(it)
-            liveParamsListener?.onParamsChanged()
+        // This build is intentionally sharpen-only: keep output at native
+        // resolution and select the CPU-matching unsharp kernel.
+        prefs.setGpuPostProcessingMethod(GpuPostProcessingMethod.UNSHARP_MASK)
+        prefs.setGpuUpscaleFactor(1.0f)
+        gpuSection.addView(miniHeader("Sharpen only — Vulkan compute"))
+        gpuSection.addView(TextView(ctx).apply {
+            setTextColor(COLOR_MUTED)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+            text = "Unsharp Mask (3x3 Gaussian), no scaling. 100% matches CPU Gamer Sharp; up to 300% is extra aggressive."
         })
 
-        val gpuScaleValue = TextView(ctx).apply {
-            setTextColor(COLOR_PRIMARY)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f)
-            typeface = android.graphics.Typeface.create(typeface, android.graphics.Typeface.BOLD)
-            text = "%.2fx".format(initial.gpuUpscaleFactor)
-        }
-        gpuSection.addView(sliderRow("GPU scale", gpuScaleValue))
-        gpuSection.addView(SeekBar(ctx).apply {
-            max = 4
-            progress = ((initial.gpuUpscaleFactor - 1.0f) / 0.25f).toInt().coerceIn(0, 4)
-            progressDrawable = buildSeekTrack()
-            thumb = buildSeekThumb()
-            splitTrack = false
-            var dragging = false
-            setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                override fun onProgressChanged(seekBar: SeekBar?, p: Int, fromUser: Boolean) {
-                    val scale = (1.0f + p * 0.25f).coerceIn(1.0f, 2.0f)
-                    gpuScaleValue.text = "%.2fx".format(scale)
-                    if (fromUser) {
-                        prefs.setGpuUpscaleFactor(scale)
-                        if (!dragging) liveParamsListener?.onParamsChanged()
-                    }
-                }
-                override fun onStartTrackingTouch(seekBar: SeekBar?) { dragging = true }
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                    dragging = false
-                    liveParamsListener?.onParamsChanged()
-                }
-            })
-        })
-
-        gpuSection.addView(miniHeader("Enhancement"))
-        gpuSection.addView(gpuMethodChipRow(
-            category = GpuMethodCategory.ENHANCEMENT,
-            initial = initial.gpuPostProcessingMethod,
-        ) {
-            prefs.setGpuPostProcessingMethod(it)
-            liveParamsListener?.onParamsChanged()
-        })
-
-        gpuSection.addView(miniHeader("Sharpen & color"))
-        gpuSection.addView(gpuMethodChipRow(
-            category = GpuMethodCategory.SHARPEN_COLOR,
-            initial = initial.gpuPostProcessingMethod,
-        ) {
-            prefs.setGpuPostProcessingMethod(it)
-            liveParamsListener?.onParamsChanged()
-        })
-
-        val gpuAdvanced = collapsibleSection(gpuSection, "ADVANCED", initiallyExpanded = false)
+        val gpuAdvanced = collapsibleSection(gpuSection, "SHARPENING", initiallyExpanded = true)
 
         val gpuSharpnessValue = TextView(ctx).apply {
             setTextColor(COLOR_PRIMARY)
@@ -1384,7 +1337,7 @@ class SettingsDrawerOverlay(
             var dragging = false
             setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar?, p: Int, fromUser: Boolean) {
-                    val sharpness = (p / 10f).coerceIn(0f, 1f)
+                    val sharpness = (p / 100f).coerceIn(0f, 3f)
                     gpuSharpnessValue.text = "${(sharpness * 100f).toInt()}%"
                     if (fromUser) {
                         prefs.setGpuSharpness(sharpness)
