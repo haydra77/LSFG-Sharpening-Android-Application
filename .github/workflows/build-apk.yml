@@ -115,7 +115,7 @@ jobs:
               "} // namespace lsfg_android",
               "",
           ]
-          Path("gpu_postprocess_spv.hpp").write_text("\\n".join(lines))
+          Path("gpu_postprocess_spv.hpp").write_text(chr(10).join(lines))
           print(f"Compiled GPU shader: {len(spv)} bytes")
           PY
 
