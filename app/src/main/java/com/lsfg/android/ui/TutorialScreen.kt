@@ -65,7 +65,7 @@ private data class TutorialStep(
  *       image = R.drawable.tutorial_step_1,
  *   ),
  *
- * Drop the PNG/JPG files into LSFG-Android/app/src/main/res/drawable-nodpi/
+ * Drop the PNG/JPG files into Mob-FGSR Lab/app/src/main/res/drawable-nodpi/
  * (any density-agnostic folder works) and reference them via R.drawable.<name>.
  * Leave [image] = null to render a text-only step.
  */
@@ -73,13 +73,13 @@ private val tutorialSteps: List<TutorialStep> = listOf(
     // TODO: aggiungi qui i tuoi step. Esempio:
     // TutorialStep(
     //     title = "1. Seleziona la DLL",
-    //     description = "Apri 'Select DLL' dalla home e scegli Lossless.dll dalla tua copia di Lossless Scaling.",
+    //     description = "Apri 'Select DLL' dalla home e scegli (not required in Stage 1) dalla tua copia di Lossless Scaling.",
     //     image = R.drawable.tutorial_step_1,
     // ),
 
     TutorialStep(
         title = "1. Accessibility permissions — Step 1",
-        description = "LSFG-Android needs accessibility permissions to drive the overlay and frame generation correctly. Open your device's Accessibility settings either directly from the system Settings app, or by tapping the accessibility icon in the top-right corner of the LSFG-Android home screen.",
+        description = "Mob-FGSR Lab needs accessibility permissions to drive the overlay and frame generation correctly. Open your device's Accessibility settings either directly from the system Settings app, or by tapping the accessibility icon in the top-right corner of the Mob-FGSR Lab home screen.",
         image = R.drawable.tutorial_step_1,
     ),
 
@@ -91,36 +91,36 @@ private val tutorialSteps: List<TutorialStep> = listOf(
 
     TutorialStep(
         title = "1. Accessibility permissions — Step 3",
-        description = "Toggle the accessibility permission on for LSFG-Android, exactly as shown in the screenshot.",
+        description = "Toggle the accessibility permission on for Mob-FGSR Lab, exactly as shown in the screenshot.",
         image = R.drawable.tutorial_step_3,
     ),
 
     TutorialStep(
         title = "1. Accessibility permissions — Step 4",
-        description = "If the toggle won't turn on, your device is likely blocking restricted settings for sideloaded apps. Open the Android app info screen for LSFG-Android and look at the top-right corner — you'll see a menu icon (highlighted by the red square in the screenshot). Tap it and enable the option that appears (usually \"Allow restricted settings\"). Once done, go back and repeat the previous step — the accessibility toggle will now turn on.",
+        description = "If the toggle won't turn on, your device is likely blocking restricted settings for sideloaded apps. Open the Android app info screen for Mob-FGSR Lab and look at the top-right corner — you'll see a menu icon (highlighted by the red square in the screenshot). Tap it and enable the option that appears (usually \"Allow restricted settings\"). Once done, go back and repeat the previous step — the accessibility toggle will now turn on.",
         image = R.drawable.tutorial_step_4,
     ),
 
     TutorialStep(
-        title = "2. Loading Lossless.dll — Step 1",
-        description = "From the home screen, tap \"Select DLL\" and pick the Lossless.dll file from your own copy of Lossless Scaling.",
+        title = "2. Loading (not required in Stage 1) — Step 1",
+        description = "From the home screen, tap \"Select DLL\" and pick the (not required in Stage 1) file from your own copy of Lossless Scaling.",
         image = R.drawable.tutorial_step_5,
     ),
 
     TutorialStep(
-        title = "2. Loading Lossless.dll — Step 2",
-        description = "Read the legal notice carefully. To use this app you must own a legitimate copy of Lossless Scaling purchased from Steam — the Lossless.dll you load must come from your own personal copy. The app does not ship the DLL and never will.",
+        title = "2. Loading (not required in Stage 1) — Step 2",
+        description = "Read the legal notice carefully. To use this app you must own a legitimate copy of Lossless Scaling purchased from Steam — the (not required in Stage 1) you load must come from your own personal copy. The app does not ship the DLL and never will.",
         image = R.drawable.tutorial_step_6,
     ),
 
     TutorialStep(
-        title = "2. Loading Lossless.dll — Step 3",
-        description = "Use the system file picker to select Lossless.dll from your copy of Lossless Scaling.",
+        title = "2. Loading (not required in Stage 1) — Step 3",
+        description = "Use the system file picker to select (not required in Stage 1) from your copy of Lossless Scaling.",
         image = R.drawable.tutorial_step_7,
     ),
 
     TutorialStep(
-        title = "2. Loading Lossless.dll — Step 4",
+        title = "2. Loading (not required in Stage 1) — Step 4",
         description = "Once the DLL has been processed, you should land on this screen — the shaders are now extracted and ready.",
         image = R.drawable.tutorial_step_8,
     ),
@@ -193,7 +193,7 @@ private val tutorialSteps: List<TutorialStep> = listOf(
 
     TutorialStep(
         title = "6. Starting the overlay — Step 2",
-        description = "On some Android devices a screen-sharing picker may appear at this point. When it does, choose to share the same app you already selected as the target inside LSFG-Android — not the entire screen.",
+        description = "On some Android devices a screen-sharing picker may appear at this point. When it does, choose to share the same app you already selected as the target inside Mob-FGSR Lab — not the entire screen.",
         image = R.drawable.tutorial_step_20,
     ),
 
