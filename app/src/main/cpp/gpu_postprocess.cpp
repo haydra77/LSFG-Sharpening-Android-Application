@@ -142,6 +142,14 @@ bool GpuPostProcessor::ensurePipeline(VulkanSession &vk) {
         reset(vk);
         return false;
     }
+
+    const VkFenceCreateInfo fenceInfo{
+        .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+    };
+    if (vk.fn.vkCreateFence(vk.device, &fenceInfo, nullptr, &completionFence) != VK_SUCCESS) {
+        reset(vk);
+        return false;
+    }
     return true;
 }
 
@@ -309,10 +317,24 @@ bool GpuPostProcessor::process(VulkanSession &vk,
         .commandBufferCount = 1,
         .pCommandBuffers = &cb,
     };
-    const bool ok = vk.fn.vkQueueSubmit(vk.computeQueue, 1, &si, VK_NULL_HANDLE) == VK_SUCCESS;
-    if (ok) vk.fn.vkQueueWaitIdle(vk.computeQueue);
+    const bool submitted = vk.fn.vkQueueSubmit(
+        vk.computeQueue, 1, &si, completionFence) == VK_SUCCESS;
+    bool completed = false;
+    if (submitted) {
+        // Wait only for this post-process submission instead of idling the
+        // entire compute queue. Other queued work can proceed after this fence.
+        const VkResult waitResult = vk.fn.vkWaitForFences(
+            vk.device, 1, &completionFence, VK_TRUE, UINT64_MAX);
+        if (waitResult == VK_SUCCESS) {
+            completed = true;
+            vk.fn.vkResetFences(vk.device, 1, &completionFence);
+        } else {
+            // Preserve resource lifetime safety if the fence wait fails.
+            vk.fn.vkQueueWaitIdle(vk.computeQueue);
+        }
+    }
     vk.fn.vkFreeCommandBuffers(vk.device, vk.commandPool, 1, &cb);
-    return ok;
+    return submitted && completed;
 }
 
 void GpuPostProcessor::reset(VulkanSession &vk) {
@@ -344,6 +366,10 @@ void GpuPostProcessor::reset(VulkanSession &vk) {
     }
     descriptorPool = VK_NULL_HANDLE;
     descriptorSet = VK_NULL_HANDLE;
+    if (completionFence != VK_NULL_HANDLE && vk.fn.vkDestroyFence != nullptr) {
+        vk.fn.vkDestroyFence(vk.device, completionFence, nullptr);
+    }
+    completionFence = VK_NULL_HANDLE;
     if (pipeline != VK_NULL_HANDLE && vk.fn.vkDestroyPipeline != nullptr) {
         vk.fn.vkDestroyPipeline(vk.device, pipeline, nullptr);
     }
