@@ -39,7 +39,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: mobfgsr-stage1-capture-only-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          name: mobfgsr-lab-arm64-v8a-debug-apk
+          path: app/build/outputs/apk/debug/app-arm64-v8a-debug.apk
           if-no-files-found: warn
           retention-days: 14
