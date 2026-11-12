@@ -36,6 +36,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -229,6 +230,7 @@ fun HomeScreen(nav: NavHostController) {
 
     val canStart = state.targetPackage != null
     val a11yEnabled = PermissionsHelper.isAccessibilityServiceEnabled(ctx)
+    var touchPassThroughEnabled by remember { mutableStateOf(prefs.load().trustedOverlay) }
 
     Column(
         modifier = Modifier
@@ -450,6 +452,55 @@ fun HomeScreen(nav: NavHostController) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+            }
+        }
+
+        LsfgCard {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "TOUCH CONTROL",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = LsfgPrimary,
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Touch pass-through",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Text(
+                            text = if (a11yEnabled) {
+                                "Accessibility service is enabled. Turn this on to let touches pass through the overlay."
+                            } else {
+                                "Enable the LSFG Accessibility service first, then turn this on."
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Switch(
+                        checked = touchPassThroughEnabled,
+                        onCheckedChange = { enabled ->
+                            touchPassThroughEnabled = enabled
+                            prefs.setTrustedOverlay(enabled)
+                            if (enabled && !a11yEnabled) {
+                                ctx.startActivity(
+                                    Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                                )
+                            }
+                        },
+                    )
+                }
+                Text(
+                    text = "After changing this option, stop the current session and start it again.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
 
