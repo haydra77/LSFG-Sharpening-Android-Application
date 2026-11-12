@@ -15,7 +15,7 @@ Java_com_lsfg_android_session_NativeBridge_extractShaders(JNIEnv*, jobject, jstr
 extern "C" JNIEXPORT jint JNICALL
 Java_com_lsfg_android_session_NativeBridge_probeShaders(JNIEnv*, jobject, jstring) { return -1; }
 extern "C" JNIEXPORT jint JNICALL
-Java_com_lsfg_android_session_NativeBridge_initContext(JNIEnv*, jobject, jstring, jint, jint, jint, jfloat, jboolean, jboolean, jboolean, jboolean, jboolean, jint, jint, jfloat, jfloat, jfloat, jboolean, jboolean, jint, jfloat, jfloat, jfloat, jfloat, jboolean, jint, jint, jfloat, jfloat, jfloat, jint, jfloat, jfloat, jfloat, jint) { return -90; }
+Java_com_lsfg_android_session_NativeBridge_initContext(JNIEnv*, jobject, jstring, jint, jint, jint, jfloat, jboolean, jboolean, jboolean, jboolean, jboolean, jint, jint, jfloat, jfloat, jfloat, jboolean, jboolean, jint, jfloat, jfloat, jfloat, jfloat, jboolean, jint, jint, jfloat, jfloat, jfloat, jint, jfloat, jfloat, jfloat, jint) { return 1; }
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_lsfg_android_session_NativeBridge_isNpuAvailable(JNIEnv*, jobject) { return JNI_FALSE; }
 extern "C" JNIEXPORT jboolean JNICALL
