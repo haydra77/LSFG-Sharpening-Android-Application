@@ -152,13 +152,28 @@ bool GpuPostProcessor::process(VulkanSession &vk,
     if (src.image == VK_NULL_HANDLE || dst.image == VK_NULL_HANDLE) return false;
     if (!ensurePipeline(vk)) return false;
 
-    VkImageView srcView = makeImageView(vk, src);
-    VkImageView dstView = makeImageView(vk, dst);
-    if (srcView == VK_NULL_HANDLE || dstView == VK_NULL_HANDLE) {
-        if (srcView != VK_NULL_HANDLE) vk.fn.vkDestroyImageView(vk.device, srcView, nullptr);
-        if (dstView != VK_NULL_HANDLE) vk.fn.vkDestroyImageView(vk.device, dstView, nullptr);
-        return false;
+    // The previous dispatch is completed by the queue-idle below before this
+    // function returns, so cached views can be replaced safely when an AHB changes.
+    if (cachedSrcImage != src.image || cachedSrcView == VK_NULL_HANDLE) {
+        if (cachedSrcView != VK_NULL_HANDLE) {
+            vk.fn.vkDestroyImageView(vk.device, cachedSrcView, nullptr);
+            cachedSrcView = VK_NULL_HANDLE;
+        }
+        cachedSrcView = makeImageView(vk, src);
+        if (cachedSrcView == VK_NULL_HANDLE) return false;
+        cachedSrcImage = src.image;
     }
+    if (cachedDstImage != dst.image || cachedDstView == VK_NULL_HANDLE) {
+        if (cachedDstView != VK_NULL_HANDLE) {
+            vk.fn.vkDestroyImageView(vk.device, cachedDstView, nullptr);
+            cachedDstView = VK_NULL_HANDLE;
+        }
+        cachedDstView = makeImageView(vk, dst);
+        if (cachedDstView == VK_NULL_HANDLE) return false;
+        cachedDstImage = dst.image;
+    }
+    const VkImageView srcView = cachedSrcView;
+    const VkImageView dstView = cachedDstView;
 
     const VkDescriptorImageInfo srcInfo{
         .imageView = srcView,
@@ -199,8 +214,6 @@ bool GpuPostProcessor::process(VulkanSession &vk,
     };
     VkCommandBuffer cb = VK_NULL_HANDLE;
     if (vk.fn.vkAllocateCommandBuffers(vk.device, &cbai, &cb) != VK_SUCCESS) {
-        vk.fn.vkDestroyImageView(vk.device, srcView, nullptr);
-        vk.fn.vkDestroyImageView(vk.device, dstView, nullptr);
         return false;
     }
 
@@ -299,13 +312,15 @@ bool GpuPostProcessor::process(VulkanSession &vk,
     const bool ok = vk.fn.vkQueueSubmit(vk.computeQueue, 1, &si, VK_NULL_HANDLE) == VK_SUCCESS;
     if (ok) vk.fn.vkQueueWaitIdle(vk.computeQueue);
     vk.fn.vkFreeCommandBuffers(vk.device, vk.commandPool, 1, &cb);
-    vk.fn.vkDestroyImageView(vk.device, srcView, nullptr);
-    vk.fn.vkDestroyImageView(vk.device, dstView, nullptr);
     return ok;
 }
 
 void GpuPostProcessor::reset(VulkanSession &vk) {
     if (vk.device == VK_NULL_HANDLE) {
+        cachedSrcImage = VK_NULL_HANDLE;
+        cachedDstImage = VK_NULL_HANDLE;
+        cachedSrcView = VK_NULL_HANDLE;
+        cachedDstView = VK_NULL_HANDLE;
         descriptorSetLayout = VK_NULL_HANDLE;
         pipelineLayout = VK_NULL_HANDLE;
         pipeline = VK_NULL_HANDLE;
@@ -313,6 +328,17 @@ void GpuPostProcessor::reset(VulkanSession &vk) {
         descriptorSet = VK_NULL_HANDLE;
         return;
     }
+    // reset() is called after the render worker has stopped and the device is idle.
+    if (cachedSrcView != VK_NULL_HANDLE && vk.fn.vkDestroyImageView != nullptr) {
+        vk.fn.vkDestroyImageView(vk.device, cachedSrcView, nullptr);
+    }
+    if (cachedDstView != VK_NULL_HANDLE && vk.fn.vkDestroyImageView != nullptr) {
+        vk.fn.vkDestroyImageView(vk.device, cachedDstView, nullptr);
+    }
+    cachedSrcView = VK_NULL_HANDLE;
+    cachedDstView = VK_NULL_HANDLE;
+    cachedSrcImage = VK_NULL_HANDLE;
+    cachedDstImage = VK_NULL_HANDLE;
     if (descriptorPool != VK_NULL_HANDLE && vk.fn.vkDestroyDescriptorPool != nullptr) {
         vk.fn.vkDestroyDescriptorPool(vk.device, descriptorPool, nullptr);
     }
