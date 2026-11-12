@@ -70,7 +70,7 @@ struct RenderLoopConfig {
     int gpuStage;          // 0 before LSFG on real frames, 1 after LSFG on final frames
     int gpuMethod;         // see GpuPostProcessingMethod.nativeValue
     float gpuUpscaleFactor;// 1.0 .. 2.0
-    float gpuSharpness;    // 0.0 .. 1.0
+    float gpuSharpness;    // 0.0 .. 3.0 (0% .. 300%)
     float gpuStrength;     // 0.0 .. 1.0
     // Pacing tunables (0/negative values fall back to defaults inside the loop).
     int targetFpsCap;      // 0 = unlimited
