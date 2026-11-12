@@ -306,7 +306,17 @@ void main() {
     // the overwhelmingly common config (gpuUpscaleFactor=1.0) without
     // risking correctness at higher scale factors.
     if (gl_LocalInvocationIndex == 0u) {
-        s_useTile = (pc.srcW == pc.dstW) && (pc.srcH == pc.dstH);
+        // Shared-memory tiling only helps kernels with a wide neighborhood.
+        // Small sharpening kernels (notably method 12) touch only a handful
+        // of pixels per output; filling a 22x14 tile would load 308 pixels
+        // per workgroup for work that needs only a few dozen.
+        bool needsNeighborhoodTile =
+            pc.method == 0 || pc.method == 1 || pc.method == 2 ||
+            pc.method == 3 || pc.method == 4 || pc.method == 6 ||
+            pc.method == 7 || pc.method == 8 || pc.method == 9 ||
+            pc.method == 10 || pc.method == 11 || pc.method == 14;
+        s_useTile = needsNeighborhoodTile &&
+                    (pc.srcW == pc.dstW) && (pc.srcH == pc.dstH);
     }
     barrier();
     memoryBarrierShared();
