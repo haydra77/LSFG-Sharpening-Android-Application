@@ -102,10 +102,10 @@ std::string device_type_name(int32_t type) {
 } // namespace
 
 bool nnapi_has_npu_accelerator() {
-    if (!nnapi_npu_accelerator_devices().empty()) {
-        return true;
-    }
-    return has_snapdragon_npu_by_soc();
+    // Report available only when NNAPI exposes a dedicated accelerator.
+    // A Snapdragon SoC fingerprint alone is insufficient: without an
+    // enumerated device, createForDevices() cannot compile an NPU graph.
+    return !nnapi_npu_accelerator_devices().empty();
 }
 
 std::vector<ANeuralNetworksDevice *> nnapi_npu_accelerator_devices() {
