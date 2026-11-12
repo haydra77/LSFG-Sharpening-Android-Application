@@ -532,6 +532,14 @@ class SettingsDrawerOverlay(
             prefs.setFrameGraphEnabled(it)
             frameGraphListener?.onFrameGraphChanged(it)
         })
+        hudSection.addView(switchRow(
+            label = "Touch pass-through (Accessibility)",
+            initial = initial.trustedOverlay,
+        ) {
+            prefs.setTrustedOverlay(it)
+            Log.i(TAG, "trusted touch overlay=$it; restart session to apply")
+        })
+        hudSection.addView(miniHeader("Enable the Accessibility service, then restart the session to apply this option."))
         hudSection.addView(miniHeader("Drawer handle"))
         hudSection.addView(drawerEdgeChipRow(initial.drawerEdge) {
             prefs.setDrawerEdge(it)
