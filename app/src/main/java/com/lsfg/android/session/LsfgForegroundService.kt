@@ -450,12 +450,13 @@ class LsfgForegroundService : Service() {
                             val label = if (captureSource == CaptureSource.ROOT) "Root" else "Shizuku"
                             ov.updateStatus("LSFG: $label mirror ${w}×${h} (GPU lacks required Vulkan ext)")
                         } else if (cap != null) {
-                            cap.setSurface(surface, w, h)
+                            // Stage 1 capture-only: keep MediaProjection on the ImageReader.
+                            // Do not mirror the captured display back onto the full-screen
+                            // overlay Surface, which duplicates the game image and can
+                            // create a recursive visual feedback effect.
                             activeRenderW = 0
                             activeRenderH = 0
-                            // Retarget the bootstrap ImageReader capture to mirror
-                            // mode because framegen is unavailable.
-                            ov.updateStatus("LSFG: mirror ${w}×${h} (GPU lacks required Vulkan ext)")
+                            ov.updateStatus("Mob-FGSR: capture-only ${w}×${h}")
                         } else {
                             activeRenderW = 0
                             activeRenderH = 0
