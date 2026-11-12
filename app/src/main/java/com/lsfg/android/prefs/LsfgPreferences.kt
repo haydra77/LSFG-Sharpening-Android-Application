@@ -257,7 +257,7 @@ class LsfgPreferences(ctx: Context) {
         gpuPostProcessingStage = GpuPostProcessingStage.fromPref(prefs.getString(KEY_GPU_STAGE, null)),
         gpuPostProcessingMethod = GpuPostProcessingMethod.UNSHARP_MASK,
         gpuUpscaleFactor = 1.0f,
-        gpuSharpness = prefs.getFloat(KEY_GPU_SHARPNESS, 2.0f).coerceIn(0f, 3f),
+        gpuSharpness = prefs.getFloat(KEY_GPU_SHARPNESS, 2.0f).coerceIn(0f, 5f),
         gpuStrength = prefs.getFloat(KEY_GPU_STRENGTH, 1.0f).coerceIn(0f, 1f),
         pacingPreset = PacingPreset.fromPref(prefs.getString(KEY_PACING_PRESET, null)),
         vsyncAlignmentEnabled = prefs.getBoolean(KEY_VSYNC_ALIGN, PacingDefaults.VSYNC_ALIGNMENT),
