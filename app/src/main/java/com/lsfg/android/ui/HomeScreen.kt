@@ -453,104 +453,31 @@ fun HomeScreen(nav: NavHostController) {
             }
         }
 
-        // Steps — 5 cards grouped by concept (prerequisite → target → frame gen/pacing →
-        // image quality → display). Post-process accelerators (GPU/NPU/CPU) are no longer
-        // separate top-level steps; they share the "Image quality" screen.
-        // Stage 1: no DLL or shader extraction is needed.\n\n        StepCard(
+        // Mob-FGSR Stage 1 is a capture-only test. No DLL, shader extraction,
+        // frame-generation settings, or privileged capture setup is required.
+        StepCard(
             number = 1,
-            title = "Choose game to capture",
-            subtitle = state.targetPackage ?: "Select an Android game or app",
+            title = "Choose game or app",
+            subtitle = state.targetPackage ?: "Select an Android game to test",
             status = if (state.targetPackage != null) StatusTone.Good else StatusTone.Neutral,
-            statusLabel = if (state.targetPackage != null) "Set" else "Required",
+            statusLabel = if (state.targetPackage != null) "Selected" else "Required",
             onClick = { nav.navigate(Routes.APP_PICKER) },
         )
 
-        val frameGenSummary = if (state.lsfgEnabled) {
-            buildString {
-                append("Multiplier ${state.multiplier}× · flow ${"%.2f".format(state.flowScale)}")
-                if (state.performanceMode) append(" · perf")
-                if (state.hdrMode) append(" · HDR")
-                if (state.antiArtifacts) append(" · anti-artifacts")
+        LsfgCard(accent = true) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "CAPTURE TEST · 720p",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = LsfgPrimary,
+                )
+                Text(
+                    text = "This build checks whether Android can capture your selected app using MediaProjection. Allow the screen-capture prompt, then verify that the preview and capture counter work. Frame generation is not included yet.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
-        } else {
-            "Off — raw capture passthrough"
         }
-        StepCard(
-            number = 3,
-            title = stringResource(R.string.nav_framegen_pacing),
-            subtitle = frameGenSummary,
-            status = if (state.lsfgEnabled) StatusTone.Good else StatusTone.Neutral,
-            statusLabel = if (state.lsfgEnabled) "On" else "Off",
-            onClick = { nav.navigate(Routes.PARAMS_FRAMEGEN_PACING) },
-        )
-
-        if (SHOW_IMAGE_QUALITY) {
-            val imageQualitySummary = buildString {
-                val parts = mutableListOf<String>()
-                if (state.gpuPostProcessingEnabled) parts += "GPU " + gpuMethodLabel(state.gpuPostProcessingMethod)
-                if (state.npuPostProcessingEnabled) parts += "NPU ${(state.npuAmount * 100f).toInt()}%"
-                if (state.cpuPostProcessingEnabled) parts += "CPU ${(state.cpuStrength * 100f).toInt()}%"
-                if (parts.isEmpty()) append("Off") else append(parts.joinToString(" · "))
-            }
-            val imageQualityOn = state.gpuPostProcessingEnabled ||
-                state.npuPostProcessingEnabled ||
-                state.cpuPostProcessingEnabled
-            StepCard(
-                number = 4,
-                title = stringResource(R.string.nav_image_quality),
-                subtitle = imageQualitySummary,
-                status = if (imageQualityOn) StatusTone.Good else StatusTone.Neutral,
-                statusLabel = if (imageQualityOn) "On" else "Off",
-                onClick = { nav.navigate(Routes.PARAMS_IMAGE_QUALITY) },
-            )
-        }
-
-        val overlayDisplaySummary = buildString {
-            append(
-                when (state.captureSource) {
-                    CaptureSource.SHIZUKU -> "Shizuku capture"
-                    CaptureSource.ROOT -> "Root capture"
-                    else -> "MediaProjection"
-                },
-            )
-            append(" · ")
-            append(
-                when (state.drawerEdge) {
-                    com.lsfg.android.prefs.DrawerEdge.LEFT -> "left handle"
-                    com.lsfg.android.prefs.DrawerEdge.RIGHT -> "right handle"
-                    com.lsfg.android.prefs.DrawerEdge.TOP -> "top handle"
-                    com.lsfg.android.prefs.DrawerEdge.BOTTOM -> "bottom handle"
-                },
-            )
-            if (state.fpsCounterEnabled) append(" · FPS")
-        }
-        StepCard(
-            number = if (SHOW_IMAGE_QUALITY) 5 else 4,
-            title = stringResource(R.string.nav_overlay_display),
-            subtitle = overlayDisplaySummary,
-            status = StatusTone.Neutral,
-            statusLabel = when (state.captureSource) {
-                CaptureSource.SHIZUKU -> "Shizuku"
-                CaptureSource.ROOT -> "Root"
-                else -> "MP"
-            },
-            onClick = { nav.navigate(Routes.OVERLAY_DISPLAY) },
-        )
-
-        val autoCount = state.autoEnabledApps.size
-        val autoSubtitle = if (autoCount == 0) {
-            stringResource(R.string.automatic_overlay_count_zero)
-        } else {
-            stringResource(R.string.automatic_overlay_count_n, autoCount)
-        }
-        StepCard(
-            number = if (SHOW_IMAGE_QUALITY) 6 else 5,
-            title = stringResource(R.string.nav_automatic_overlay),
-            subtitle = autoSubtitle,
-            status = if (autoCount > 0) StatusTone.Good else StatusTone.Neutral,
-            statusLabel = if (autoCount > 0) "On" else "Off",
-            onClick = { nav.navigate(Routes.AUTOMATIC_OVERLAY) },
-        )
 
         // Footer actions
         LsfgCard {
