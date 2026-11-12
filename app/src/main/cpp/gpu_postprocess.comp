@@ -242,18 +242,18 @@ vec3 sharpen(vec3 color, vec2 srcPos, float amount) {
 // CPU GAMER_SHARP equivalent: a 3x3 Gaussian unsharp mask.
 // This runs entirely in the Vulkan compute shader, avoiding CPU readback.
 vec3 sharpenCpuMatch(vec3 color, vec2 srcPos, float amount) {
+    // Performance 5-tap cross unsharp mask. Four neighbor reads instead
+    // of the 8 surrounding reads used by the 3x3 Gaussian kernel.
+    // This reduces texture-load pressure on mobile GPUs while retaining
+    // a center-weighted high-pass sharpening response.
     ivec2 p = ivec2(floor(srcPos));
     vec3 blur =
-        loadPx(p + ivec2(-1, -1)).rgb +
-        2.0 * loadPx(p + ivec2( 0, -1)).rgb +
-        loadPx(p + ivec2( 1, -1)).rgb +
-        2.0 * loadPx(p + ivec2(-1,  0)).rgb +
         4.0 * color +
-        2.0 * loadPx(p + ivec2( 1,  0)).rgb +
-        loadPx(p + ivec2(-1,  1)).rgb +
-        2.0 * loadPx(p + ivec2( 0,  1)).rgb +
-        loadPx(p + ivec2( 1,  1)).rgb;
-    blur *= (1.0 / 16.0);
+        loadPx(p + ivec2(-1,  0)).rgb +
+        loadPx(p + ivec2( 1,  0)).rgb +
+        loadPx(p + ivec2( 0, -1)).rgb +
+        loadPx(p + ivec2( 0,  1)).rgb;
+    blur *= (1.0 / 8.0);
     return clamp(color + (color - blur) * amount, 0.0, 1.0);
 }
 
