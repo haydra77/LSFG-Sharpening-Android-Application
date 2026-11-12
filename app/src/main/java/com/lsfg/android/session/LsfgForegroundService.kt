@@ -436,7 +436,7 @@ class LsfgForegroundService : Service() {
                         if (isPrivilegedCapture) {
                             pendingPrivilegedVideoStart = ShizukuVideoStart(w, h, cfg)
                         }
-                        ov.updateStatus("LSFG: frame-gen active ${w}×${h} ×${cfg.multiplier}")
+                        ov.updateStatus("Mob-FGSR: blend frame generation active (prototype)")
                         // If the user launched this session via the Benchmark
                         // screen, hand control to BenchmarkController now that
                         // framegen has reached steady state. The controller runs
@@ -583,7 +583,7 @@ class LsfgForegroundService : Service() {
             capture?.frameGenBypass = bypass
             runCatching { NativeBridge.setBypass(bypass) }
                 .onFailure { LsfgLog.w(TAG, "setBypass failed", it) }
-            ov.updateStatus(if (bypass) "LSFG: bypass (raw capture)" else "LSFG: frame-gen active")
+            ov.updateStatus(if (bypass) "Mob-FGSR: bypass (raw capture)" else "Mob-FGSR: blend frame generation active (prototype)")
         }
         dr.setStopOverlayListener {
             LsfgLog.i(TAG, "Stop overlay requested from drawer")
