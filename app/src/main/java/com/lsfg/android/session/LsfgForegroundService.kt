@@ -53,6 +53,8 @@ class LsfgForegroundService : Service() {
     private var targetPkgPending: String? = null
     private var initialCaptureStarted: Boolean = false
     private var lsfgContextActive: Boolean = false
+    @Volatile
+    private var captureOnlyStage1: Boolean = false
     private var lastSurface: Surface? = null
     private var lastSurfaceW: Int = 0
     private var lastSurfaceH: Int = 0
@@ -424,6 +426,7 @@ class LsfgForegroundService : Service() {
                 }
                 when {
                     rc == 0 -> {
+                        captureOnlyStage1 = false
                         // Framegen active: the ImageReader path is already running;
                         // now allow frames into the native render loop.
                         lsfgContextActive = true
@@ -450,6 +453,8 @@ class LsfgForegroundService : Service() {
                             val label = if (captureSource == CaptureSource.ROOT) "Root" else "Shizuku"
                             ov.updateStatus("LSFG: $label mirror ${w}×${h} (GPU lacks required Vulkan ext)")
                         } else if (cap != null) {
+                            captureOnlyStage1 = true
+                            cap.clearSurface()
                             // Stage 1 capture-only: keep MediaProjection on the ImageReader.
                             // Do not mirror the captured display back onto the full-screen
                             // overlay Surface, which duplicates the game image and can
@@ -512,6 +517,10 @@ class LsfgForegroundService : Service() {
                         }
                     }.onFailure { LsfgLog.w(TAG, "startFpsCounter failed", it) }
                 }
+            } else if (captureOnlyStage1) {
+                // Stage 1 is capture-only: never attach the captured display to
+                // the visible overlay Surface, including after surface recreation.
+                cap?.clearSurface()
             } else if (!lsfgContextActive || activeRenderW == 0) {
                 // Mirror mode (framegen disabled or context not yet active): retarget
                 // the existing VirtualDisplay onto the new Surface. activeRenderW==0
