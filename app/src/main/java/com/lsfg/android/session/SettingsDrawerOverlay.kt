@@ -1337,7 +1337,7 @@ class SettingsDrawerOverlay(
             var dragging = false
             setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar?, p: Int, fromUser: Boolean) {
-                    val sharpness = (p / 100f).coerceIn(0f, 3f)
+                    val sharpness = (p / 100f).coerceIn(0f, 5f)
                     gpuSharpnessValue.text = "${(sharpness * 100f).toInt()}%"
                     if (fromUser) {
                         prefs.setGpuSharpness(sharpness)
