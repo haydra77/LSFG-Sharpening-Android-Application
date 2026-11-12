@@ -2289,7 +2289,7 @@ int initRenderLoop(const char *cacheDir, const RenderLoopConfig &cfg) {
     g.gpuStage = cfg.gpuStage == 0 ? 0 : 1;
     g.gpuMethod = cfg.gpuMethod < 0 ? 0 : (cfg.gpuMethod > 15 ? 0 : cfg.gpuMethod);
     g.gpuUpscaleFactor = clampScale(cfg.gpuUpscaleFactor);
-    g.gpuSharpness = clamp01(cfg.gpuSharpness);
+    g.gpuSharpness = std::clamp(cfg.gpuSharpness, 0.0f, 3.0f);
     g.gpuStrength = clamp01(cfg.gpuStrength);
     g.gpuNoopLogged = false;
     if (g.gpuPostProcessing) {
