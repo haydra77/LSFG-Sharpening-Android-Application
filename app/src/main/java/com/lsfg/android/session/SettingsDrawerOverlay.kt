@@ -1316,7 +1316,7 @@ class SettingsDrawerOverlay(
         gpuSection.addView(TextView(ctx).apply {
             setTextColor(Color.LTGRAY)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
-            text = "Unsharp Mask (3x3 Gaussian), no scaling. 100% matches CPU Gamer Sharp; up to 300% is extra aggressive."
+            text = "Unsharp Mask (3x3 Gaussian), no scaling. 100% matches CPU Gamer Sharp; up to 500% is extra aggressive."
         })
 
         val gpuAdvanced = collapsibleSection(gpuSection, "SHARPENING", initiallyExpanded = true)
