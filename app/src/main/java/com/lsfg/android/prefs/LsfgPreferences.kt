@@ -341,7 +341,7 @@ class LsfgPreferences(ctx: Context) {
         .putFloat(KEY_GPU_UPSCALE, value.coerceIn(1.0f, 2.0f))
         .apply()
     fun setGpuSharpness(value: Float) = prefs.edit()
-        .putFloat(KEY_GPU_SHARPNESS, value.coerceIn(0f, 3f))
+        .putFloat(KEY_GPU_SHARPNESS, value.coerceIn(0f, 5f))
         .apply()
     fun setGpuStrength(value: Float) = prefs.edit()
         .putFloat(KEY_GPU_STRENGTH, value.coerceIn(0f, 1f))
