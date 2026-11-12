@@ -1329,8 +1329,8 @@ class SettingsDrawerOverlay(
         }
         gpuAdvanced.addView(sliderRow("GPU sharpness", gpuSharpnessValue))
         gpuAdvanced.addView(SeekBar(ctx).apply {
-            max = 300
-            progress = (initial.gpuSharpness * 100f).toInt().coerceIn(0, 300)
+            max = 500
+            progress = (initial.gpuSharpness * 100f).toInt().coerceIn(0, 500)
             progressDrawable = buildSeekTrack()
             thumb = buildSeekThumb()
             splitTrack = false
