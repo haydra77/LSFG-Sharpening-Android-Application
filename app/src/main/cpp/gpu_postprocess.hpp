@@ -29,6 +29,11 @@ private:
     VkPipeline pipeline = VK_NULL_HANDLE;
     VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
     VkDescriptorSet descriptorSet = VK_NULL_HANDLE;
+    // Reuse image views across frames; the post-LSFG path uses stable AHB images.
+    VkImage cachedSrcImage = VK_NULL_HANDLE;
+    VkImage cachedDstImage = VK_NULL_HANDLE;
+    VkImageView cachedSrcView = VK_NULL_HANDLE;
+    VkImageView cachedDstView = VK_NULL_HANDLE;
 };
 
 } // namespace lsfg_android
