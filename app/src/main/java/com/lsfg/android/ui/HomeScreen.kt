@@ -227,7 +227,7 @@ fun HomeScreen(nav: NavHostController) {
         onDispose { Shizuku.removeRequestPermissionResultListener(listener) }
     }
 
-    val canStart = state.shadersReady && state.targetPackage != null
+    val canStart = state.targetPackage != null
     val a11yEnabled = PermissionsHelper.isAccessibilityServiceEnabled(ctx)
 
     Column(
@@ -439,13 +439,13 @@ fun HomeScreen(nav: NavHostController) {
             LsfgCard {
                 Column {
                     Text(
-                        text = "ROOT CAPTURE",
+                        text = "SCREEN CAPTURE · STAGE 1",
                         style = MaterialTheme.typography.labelSmall,
                         color = LsfgPrimary,
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "Uses root UID-filtered capture for the target app — no MediaProjection consent dialog. Requires root access granted to LLS in your root manager (Magisk / KernelSU / APatch).",
+                        text = "Capture the selected app through Android MediaProjection. Lossless.dll and root access are not required for this test build.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -456,30 +456,10 @@ fun HomeScreen(nav: NavHostController) {
         // Steps — 5 cards grouped by concept (prerequisite → target → frame gen/pacing →
         // image quality → display). Post-process accelerators (GPU/NPU/CPU) are no longer
         // separate top-level steps; they share the "Image quality" screen.
-        val dllStatus = if (state.shadersReady) StatusTone.Good
-        else if (state.dllDisplayName != null) StatusTone.Warn
-        else StatusTone.Neutral
-        val dllLabel = if (state.shadersReady) "Ready"
-        else if (state.dllDisplayName != null) "Pending"
-        else "Required"
-
-        StepCard(
+        // Stage 1: no DLL or shader extraction is needed.\n\n        StepCard(
             number = 1,
-            title = stringResource(R.string.nav_dll),
-            subtitle = if (state.dllDisplayName != null)
-                state.dllDisplayName!!
-            else stringResource(R.string.dll_status_none),
-            status = dllStatus,
-            statusLabel = dllLabel,
-            onClick = {
-                if (!state.legalAccepted) nav.navigate(Routes.LEGAL) else nav.navigate(Routes.DLL)
-            },
-        )
-
-        StepCard(
-            number = 2,
-            title = stringResource(R.string.nav_app),
-            subtitle = state.targetPackage ?: "No app selected",
+            title = "Choose game to capture",
+            subtitle = state.targetPackage ?: "Select an Android game or app",
             status = if (state.targetPackage != null) StatusTone.Good else StatusTone.Neutral,
             statusLabel = if (state.targetPackage != null) "Set" else "Required",
             onClick = { nav.navigate(Routes.APP_PICKER) },
