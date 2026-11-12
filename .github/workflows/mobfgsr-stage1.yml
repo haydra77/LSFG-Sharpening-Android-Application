@@ -33,6 +33,7 @@ jobs:
           repository: FrankBarretta/lsfg-vk-android
           ref: release
           path: lsfg-vk-android
+          submodules: recursive
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
