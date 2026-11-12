@@ -4,6 +4,7 @@
 // Mob-FGSR-inspired motion estimation / reprojection is a later stage.
 #include <jni.h>
 #include <android/hardware_buffer.h>
+#include <android/hardware_buffer_jni.h>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
 #include <android/log.h>
