@@ -1,15 +1,16 @@
 cmake_minimum_required(VERSION 3.22.1)
-project(mobfgsr_capture_stage1 LANGUAGES C CXX)
+project(mobfgsr_android_blend LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 find_library(log-lib log)
+find_library(android-lib android)
 
-# Stage 1 intentionally builds without LSFG, DXBC, PE parsing or Vulkan
-# frame-generation dependencies. MediaProjection capture remains in Kotlin.
+# Android native prototype: AHardwareBuffer CPU read + ANativeWindow output.
+# This validates real intermediate-frame presentation before GPU optical flow.
 add_library(lsfg-android SHARED
     mobfgsr_stage1_jni.cpp
 )
-target_link_libraries(lsfg-android PRIVATE ${log-lib})
+target_link_libraries(lsfg-android PRIVATE ${log-lib} ${android-lib})
