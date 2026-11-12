@@ -348,6 +348,7 @@ void GpuPostProcessor::reset(VulkanSession &vk) {
         pipeline = VK_NULL_HANDLE;
         descriptorPool = VK_NULL_HANDLE;
         descriptorSet = VK_NULL_HANDLE;
+        completionFence = VK_NULL_HANDLE;
         return;
     }
     // reset() is called after the render worker has stopped and the device is idle.
